@@ -70,10 +70,12 @@ public class CalendarPagerAdapter extends PagerAdapter {
         ArrayList<CalendarGridItem> gridItems = new ArrayList<>();
         int[] days = context.getResources().getIntArray(R.array.days_month);
         String[] days_week = context.getResources().getStringArray(R.array.days_week);
+
         Calendar firstDay = Calendar.getInstance();
         firstDay.set(Calendar.DAY_OF_MONTH, 1);
         firstDay.set(Calendar.MONTH, month);
         firstDay.set(Calendar.YEAR, year);
+
         int padding = firstDay.get(Calendar.DAY_OF_WEEK);
 
         for (String aDays_week : days_week) {
@@ -92,10 +94,17 @@ public class CalendarPagerAdapter extends PagerAdapter {
             gridItems.add(gridItem);
         }
 
-        for (int day : days) {
+        Calendar lastDay = Calendar.getInstance();
+        lastDay.set(Calendar.DAY_OF_MONTH, 1);
+        lastDay.set(Calendar.MONTH, month);
+        lastDay.set(Calendar.YEAR, year);
+        lastDay.add(Calendar.MONTH, 1);
+        lastDay.add(Calendar.DAY_OF_MONTH, -1);
+
+        for (int i = 0; i < lastDay.get(Calendar.DAY_OF_MONTH); i++) {
             CalendarGridItem gridItem = new CalendarGridItem();
             gridItem.setSelectable(true);
-            gridItem.setLabel(String.valueOf(day));
+            gridItem.setLabel(String.valueOf(days[i]));
             gridItem.setItemType(Constants.ITEM_TYPE_DAY);
             gridItems.add(gridItem);
         }
