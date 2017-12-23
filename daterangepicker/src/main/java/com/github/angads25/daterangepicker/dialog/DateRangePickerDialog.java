@@ -17,6 +17,7 @@
 package com.github.angads25.daterangepicker.dialog;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatDialog;
@@ -104,7 +105,7 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         viewPager = findViewById(R.id.calendar_pager);
 
         years = new ArrayList<>();
-        for(int year: context.getResources().getIntArray(R.array.years)) {
+        for (int year : context.getResources().getIntArray(R.array.years)) {
             years.add(year);
         }
 
@@ -122,9 +123,9 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if(newState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
                     View centerView = snapHelper.findSnapView(yearLayoutManager);
-                    if(centerView!=null) {
+                    if (centerView != null) {
                         int pos = yearLayoutManager.getPosition(centerView);
                         int month = Utility.getMonthFromPosition(pagerPosition);
                         int year = years.get(pos);
@@ -149,8 +150,12 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         Calendar cal = Calendar.getInstance();
         int offset = Utility.getPositionFromYearMonth(startOfYear, cal.get(Calendar.MONTH), cal.get(Calendar.YEAR));
         pagerPosition = offset;
-        if(offset == 0) {
+        if (offset == 0) {
             tvYearMonth.setText(calendarAdapter.getPageTitle(0));
+            if(isYearRevealed || context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                int offsetYear = years.indexOf(Utility.getYearFromPosition(startOfYear, pagerPosition));
+                yearPicker.scrollToPosition(offsetYear);
+            }
         } else {
             viewPager.setCurrentItem(offset);
         }
@@ -164,7 +169,6 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         findViewById(R.id.action_drop_up).setOnClickListener(this);
         findViewById(R.id.action_drop_down).setOnClickListener(this);
     }
-
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
@@ -181,7 +185,7 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         } else {
             actionNext.setEnabled(true);
         }
-        if(isYearRevealed) {
+        if(isYearRevealed || context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             int offset = years.indexOf(Utility.getYearFromPosition(startOfYear, pagerPosition));
             yearPicker.scrollToPosition(offset);
         }
@@ -199,14 +203,16 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         } else if(id == R.id.action_next) {
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
         } else if(id == R.id.tv_month_year) {
-            if(isYearRevealed) {
-                yearPickerLayout.setVisibility(View.GONE);
-                isYearRevealed = false;
-            } else {
-                yearPickerLayout.setVisibility(View.VISIBLE);
-                isYearRevealed = true;
-                int offset = years.indexOf(Utility.getYearFromPosition(startOfYear, pagerPosition));
-                yearPicker.scrollToPosition(offset);
+            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (isYearRevealed) {
+                    yearPickerLayout.setVisibility(View.GONE);
+                    isYearRevealed = false;
+                } else {
+                    yearPickerLayout.setVisibility(View.VISIBLE);
+                    isYearRevealed = true;
+                    int offset = years.indexOf(Utility.getYearFromPosition(startOfYear, pagerPosition));
+                    yearPicker.scrollToPosition(offset);
+                }
             }
         } else if(id == R.id.action_cancel) {
             cancel();
