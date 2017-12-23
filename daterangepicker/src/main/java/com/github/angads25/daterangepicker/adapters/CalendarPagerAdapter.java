@@ -35,6 +35,7 @@ import com.github.angads25.daterangepicker.utils.Constants;
 import com.github.angads25.daterangepicker.utils.Utility;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * <p>
@@ -49,29 +50,51 @@ public class CalendarPagerAdapter extends PagerAdapter {
     private ArrayList<Date> dates;
     private Pair<Date, Date> datePair;
 
+    private int startOfYear;
+
     public CalendarPagerAdapter(Context context, ArrayList<Date> dates) {
         this.context = context;
         this.dates = dates;
         inflater = LayoutInflater.from(context);
+        startOfYear = context.getResources().getIntArray(R.array.years)[0];
     }
 
     @NonNull
     @Override
     public View instantiateItem(@NonNull ViewGroup container, int position) {
+        int year = Utility.getYearFromPosition(startOfYear, position);
+        int month = Utility.getMonthFromPosition(position);
         View itemView = inflater.inflate(R.layout.item_calendar, container, false);
         RecyclerView recyclerView = itemView.findViewById(R.id.grid_calender);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 7));
         ArrayList<CalendarGridItem> gridItems = new ArrayList<>();
         int[] days = context.getResources().getIntArray(R.array.days_month);
         String[] days_week = context.getResources().getStringArray(R.array.days_week);
+        Calendar firstDay = Calendar.getInstance();
+        firstDay.set(Calendar.DAY_OF_MONTH, 1);
+        firstDay.set(Calendar.MONTH, month);
+        firstDay.set(Calendar.YEAR, year);
+        int padding = firstDay.get(Calendar.DAY_OF_WEEK);
+
         for (String aDays_week : days_week) {
             CalendarGridItem gridItem = new CalendarGridItem();
             gridItem.setLabel(aDays_week);
+            gridItem.setSelectable(false);
             gridItem.setItemType(Constants.ITEM_TYPE_WEEK);
             gridItems.add(gridItem);
         }
+
+        for(int i = 0; i < padding - 1; i++) {
+            CalendarGridItem gridItem = new CalendarGridItem();
+            gridItem.setLabel("");
+            gridItem.setSelectable(false);
+            gridItem.setItemType(Constants.ITEM_TYPE_WEEK);
+            gridItems.add(gridItem);
+        }
+
         for (int day : days) {
             CalendarGridItem gridItem = new CalendarGridItem();
+            gridItem.setSelectable(true);
             gridItem.setLabel(String.valueOf(day));
             gridItem.setItemType(Constants.ITEM_TYPE_DAY);
             gridItems.add(gridItem);
@@ -89,7 +112,7 @@ public class CalendarPagerAdapter extends PagerAdapter {
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
-        int year = Utility.getYearFromPosition(position);
+        int year = Utility.getYearFromPosition(startOfYear, position);
         int month = Utility.getMonthFromPosition(position);
 
         String monthString = context.getResources().getStringArray(R.array.months)[month];

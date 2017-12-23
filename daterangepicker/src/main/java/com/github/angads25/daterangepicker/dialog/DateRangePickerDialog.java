@@ -48,6 +48,8 @@ import java.util.Calendar;
 public class DateRangePickerDialog extends AppCompatDialog implements
         ViewPager.OnPageChangeListener,
         View.OnClickListener {
+    private int startOfYear;
+
     private Context context;
 
     private ArrayList<Integer> years;
@@ -66,6 +68,8 @@ public class DateRangePickerDialog extends AppCompatDialog implements
 
     private boolean isYearRevealed = false;
     private int pagerPosition;
+
+    private LinearLayoutManager yearLayoutManager;
 
     public DateRangePickerDialog(Context context) {
         super(context);
@@ -89,6 +93,8 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_date_range_picker);
 
+        startOfYear = context.getResources().getIntArray(R.array.years)[0];
+
         tvYearMonth = findViewById(R.id.tv_month_year);
         actionBack = findViewById(R.id.action_back);
         actionNext = findViewById(R.id.action_next);
@@ -98,12 +104,12 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         viewPager = findViewById(R.id.calendar_pager);
 
         years = new ArrayList<>();
-        for(int i = 1900; i < 2101; i++) {
-            years.add(i);
+        for(int year: context.getResources().getIntArray(R.array.years)) {
+            years.add(year);
         }
 
         yearPicker = findViewById(R.id.list_year_picker);
-        final LinearLayoutManager yearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        yearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         yearPicker.setLayoutManager(yearLayoutManager);
         yearAdapter = new YearPickerAdapter(context, years);
         yearPicker.setAdapter(yearAdapter);
@@ -122,7 +128,7 @@ public class DateRangePickerDialog extends AppCompatDialog implements
                         int pos = yearLayoutManager.getPosition(centerView);
                         int month = Utility.getMonthFromPosition(pagerPosition);
                         int year = years.get(pos);
-                        pagerPosition = Utility.getPositionFromYearMonth(month, year);
+                        pagerPosition = Utility.getPositionFromYearMonth(startOfYear, month, year);
                         viewPager.setCurrentItem(pagerPosition, true);
                     }
                 }
@@ -130,10 +136,10 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         });
 
         ArrayList<Date> dates = new ArrayList<>();
-        for (int i = 0; i < 2412; i++) {
+        for (int i = 0; i < (years.size() * 12); i++) {
             Date date = new Date();
             date.setMonth(Utility.getMonthFromPosition(i));
-            date.setYear(Utility.getYearFromPosition(i));
+            date.setYear(Utility.getYearFromPosition(startOfYear, i));
             dates.add(date);
         }
         calendarAdapter = new CalendarPagerAdapter(context, dates);
@@ -141,9 +147,13 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         viewPager.addOnPageChangeListener(this);
 
         Calendar cal = Calendar.getInstance();
-        int offset = Utility.getPositionFromYearMonth(cal.get(Calendar.MONTH), cal.get(Calendar.YEAR));
+        int offset = Utility.getPositionFromYearMonth(startOfYear, cal.get(Calendar.MONTH), cal.get(Calendar.YEAR));
         pagerPosition = offset;
-        viewPager.setCurrentItem(offset);
+        if(offset == 0) {
+            tvYearMonth.setText(calendarAdapter.getPageTitle(0));
+        } else {
+            viewPager.setCurrentItem(offset);
+        }
 
         actionBack.setOnClickListener(this);
         actionNext.setOnClickListener(this);
@@ -151,6 +161,8 @@ public class DateRangePickerDialog extends AppCompatDialog implements
 
         findViewById(R.id.action_ok).setOnClickListener(this);
         findViewById(R.id.action_cancel).setOnClickListener(this);
+        findViewById(R.id.action_drop_up).setOnClickListener(this);
+        findViewById(R.id.action_drop_down).setOnClickListener(this);
     }
 
     @Override
@@ -170,8 +182,8 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             actionNext.setEnabled(true);
         }
         if(isYearRevealed) {
-            int offset = years.indexOf(Utility.getYearFromPosition(pagerPosition));
-            yearPicker.smoothScrollToPosition(offset);
+            int offset = years.indexOf(Utility.getYearFromPosition(startOfYear, pagerPosition));
+            yearPicker.scrollToPosition(offset);
         }
         tvYearMonth.setText(calendarAdapter.getPageTitle(position));
     }
@@ -193,13 +205,31 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             } else {
                 yearPickerLayout.setVisibility(View.VISIBLE);
                 isYearRevealed = true;
-                int offset = years.indexOf(Utility.getYearFromPosition(pagerPosition));
+                int offset = years.indexOf(Utility.getYearFromPosition(startOfYear, pagerPosition));
                 yearPicker.scrollToPosition(offset);
             }
         } else if(id == R.id.action_cancel) {
             cancel();
         } else if(id == R.id.action_ok) {
             dismiss();
+        } else if(id == R.id.action_drop_up) {
+            int position = yearLayoutManager.findFirstVisibleItemPosition();
+            if(position - 1 >= 0) {
+                yearPicker.scrollToPosition(position - 1);
+                int month = Utility.getMonthFromPosition(pagerPosition);
+                int year = years.get(position - 1);
+                pagerPosition = Utility.getPositionFromYearMonth(startOfYear, month, year);
+                viewPager.setCurrentItem(pagerPosition, true);
+            }
+        } else if(id == R.id.action_drop_down) {
+            int position = yearLayoutManager.findFirstVisibleItemPosition();
+            if(position + 1 < years.size()) {
+                yearPicker.scrollToPosition(position + 1);
+                int month = Utility.getMonthFromPosition(pagerPosition);
+                int year = years.get(position + 1);
+                pagerPosition = Utility.getPositionFromYearMonth(startOfYear, month, year);
+                viewPager.setCurrentItem(pagerPosition, true);
+            }
         }
     }
 }

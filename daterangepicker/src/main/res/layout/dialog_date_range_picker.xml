@@ -172,10 +172,12 @@
         android:gravity="center"
         tools:visibility="visible">
 
-        <android.support.v7.widget.AppCompatImageView
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/action_drop_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_drop_up"/>
+            android:src="@drawable/ic_action_drop_up"
+            android:background="?selectableItemBackground"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list_year_picker"
@@ -185,10 +187,12 @@
             android:overScrollMode="never"
             tools:listitem="@layout/list_item_year"/>
 
-        <android.support.v7.widget.AppCompatImageView
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/action_drop_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_drop_down"/>
+            android:src="@drawable/ic_action_drop_down"
+            android:background="?selectableItemBackground"/>
     </android.support.v7.widget.LinearLayoutCompat>
 
     <android.support.v4.view.ViewPager

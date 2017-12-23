@@ -25,18 +25,20 @@ package com.github.angads25.daterangepicker.utils;
 public class Utility {
 
     // Assuming dates range from 1900-2100
-    public static int getYearFromPosition(int position) {
-        int startYear = 1900;
-        return startYear + ((int) Math.floor(position / 12));
+    public static int getYearFromPosition(int startOfYear, int position) {
+        return startOfYear + ((int) Math.floor(position / 12));
     }
 
     public static int getMonthFromPosition(int position) {
         return position % 12;
     }
 
-    public static int getPositionFromYearMonth(int month, int year) {
-        int startYear = 1900;
-        return ((year - startYear) * 12) + (month);
+    // Date 24/12/2017, startOfYear = 2018, month = Dec, year = 2017; offset = -1
+    public static int getPositionFromYearMonth(int startOfYear, int month, int year) {
+        if(startOfYear > year) {
+            return 0;
+        } else {
+            return ((year - startOfYear) * 12) + (month);
+        }
     }
-
 }
