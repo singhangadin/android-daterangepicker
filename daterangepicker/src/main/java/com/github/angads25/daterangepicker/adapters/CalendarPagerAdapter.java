@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import com.github.angads25.daterangepicker.R;
 import com.github.angads25.daterangepicker.model.CalendarGridItem;
 import com.github.angads25.daterangepicker.model.Date;
+import com.github.angads25.daterangepicker.utils.Constants;
 import com.github.angads25.daterangepicker.utils.Utility;
 
 import java.util.ArrayList;
@@ -66,11 +67,13 @@ public class CalendarPagerAdapter extends PagerAdapter {
         for (String aDays_week : days_week) {
             CalendarGridItem gridItem = new CalendarGridItem();
             gridItem.setLabel(aDays_week);
+            gridItem.setItemType(Constants.ITEM_TYPE_WEEK);
             gridItems.add(gridItem);
         }
         for (int day : days) {
             CalendarGridItem gridItem = new CalendarGridItem();
             gridItem.setLabel(String.valueOf(day));
+            gridItem.setItemType(Constants.ITEM_TYPE_DAY);
             gridItems.add(gridItem);
         }
         recyclerView.setAdapter(new CalendarGridAdapter(context, gridItems));

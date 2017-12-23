@@ -17,7 +17,7 @@
 package com.github.angads25.daterangepicker.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.AppCompatTextView;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +25,8 @@ import android.view.ViewGroup;
 
 import com.github.angads25.daterangepicker.R;
 import com.github.angads25.daterangepicker.model.CalendarGridItem;
+import com.github.angads25.daterangepicker.utils.Constants;
+import com.github.angads25.daterangepicker.widget.SquareAppCompatTextView;
 
 import java.util.ArrayList;
 
@@ -51,7 +53,13 @@ public class CalendarGridAdapter extends RecyclerView.Adapter<CalendarGridAdapte
 
     @Override
     public void onBindViewHolder(CalendarViewHolder holder, int position) {
-        holder.label.setText(gridItems.get(position).getLabel());
+        CalendarGridItem gridItem = gridItems.get(position);
+        if(gridItem.getItemType() == Constants.ITEM_TYPE_WEEK) {
+            holder.label.setTextColor(Color.parseColor("#A09FA0"));
+        } else if(gridItem.getItemType() == Constants.ITEM_TYPE_DAY) {
+            holder.label.setTextColor(Color.parseColor("#444444"));
+        }
+        holder.label.setText(gridItem.getLabel());
     }
 
     @Override
@@ -60,7 +68,7 @@ public class CalendarGridAdapter extends RecyclerView.Adapter<CalendarGridAdapte
     }
 
     class CalendarViewHolder extends RecyclerView.ViewHolder {
-        AppCompatTextView label;
+        SquareAppCompatTextView label;
 
         CalendarViewHolder(View itemView) {
             super(itemView);

@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
+        android:overScrollMode="never"
         app:spanCount="7"
         app:layoutManager="android.support.v7.widget.GridLayoutManager"
         tools:listitem="@layout/grid_item_calendar"/>

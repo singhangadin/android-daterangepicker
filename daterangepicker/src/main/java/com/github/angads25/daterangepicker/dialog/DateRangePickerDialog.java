@@ -20,14 +20,19 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatDialog;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSnapHelper;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.Window;
+import android.widget.AbsListView;
 
 import com.github.angads25.daterangepicker.R;
 import com.github.angads25.daterangepicker.adapters.CalendarPagerAdapter;
+import com.github.angads25.daterangepicker.adapters.YearPickerAdapter;
 import com.github.angads25.daterangepicker.model.Date;
 import com.github.angads25.daterangepicker.utils.Utility;
 
@@ -45,17 +50,22 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         View.OnClickListener {
     private Context context;
 
+    private ArrayList<Integer> years;
+
+    private YearPickerAdapter yearAdapter;
     private CalendarPagerAdapter calendarAdapter;
 
-    private AppCompatTextView tvYearMonth;
+    private LinearLayoutCompat yearPickerLayout;
 
     private ViewPager viewPager;
 
+    private RecyclerView yearPicker;
+    private AppCompatTextView tvYearMonth;
     private AppCompatImageButton actionBack;
     private AppCompatImageButton actionNext;
 
-    private AppCompatButton actionOk;
-    private AppCompatButton actionCancel;
+    private boolean isYearRevealed = false;
+    private int pagerPosition;
 
     public DateRangePickerDialog(Context context) {
         super(context);
@@ -83,7 +93,42 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         actionBack = findViewById(R.id.action_back);
         actionNext = findViewById(R.id.action_next);
 
+        yearPickerLayout = findViewById(R.id.layout_year_picker);
+
         viewPager = findViewById(R.id.calendar_pager);
+
+        years = new ArrayList<>();
+        for(int i = 1900; i < 2101; i++) {
+            years.add(i);
+        }
+
+        yearPicker = findViewById(R.id.list_year_picker);
+        final LinearLayoutManager yearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        yearPicker.setLayoutManager(yearLayoutManager);
+        yearAdapter = new YearPickerAdapter(context, years);
+        yearPicker.setAdapter(yearAdapter);
+
+        final LinearSnapHelper snapHelper = new LinearSnapHelper();
+        snapHelper.attachToRecyclerView(yearPicker);
+        yearPicker.setOnFlingListener(snapHelper);
+
+        yearPicker.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if(newState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                    View centerView = snapHelper.findSnapView(yearLayoutManager);
+                    if(centerView!=null) {
+                        int pos = yearLayoutManager.getPosition(centerView);
+                        int month = Utility.getMonthFromPosition(pagerPosition);
+                        int year = years.get(pos);
+                        pagerPosition = Utility.getPositionFromYearMonth(month, year);
+                        viewPager.setCurrentItem(pagerPosition, true);
+                    }
+                }
+            }
+        });
+
         ArrayList<Date> dates = new ArrayList<>();
         for (int i = 0; i < 2412; i++) {
             Date date = new Date();
@@ -97,10 +142,13 @@ public class DateRangePickerDialog extends AppCompatDialog implements
 
         Calendar cal = Calendar.getInstance();
         int offset = Utility.getPositionFromYearMonth(cal.get(Calendar.MONTH), cal.get(Calendar.YEAR));
+        pagerPosition = offset;
         viewPager.setCurrentItem(offset);
 
         actionBack.setOnClickListener(this);
         actionNext.setOnClickListener(this);
+        tvYearMonth.setOnClickListener(this);
+
         findViewById(R.id.action_ok).setOnClickListener(this);
         findViewById(R.id.action_cancel).setOnClickListener(this);
     }
@@ -110,6 +158,7 @@ public class DateRangePickerDialog extends AppCompatDialog implements
 
     @Override
     public void onPageSelected(int position) {
+        pagerPosition = position;
         if(position == 0) {
             actionBack.setEnabled(false);
         } else {
@@ -119,6 +168,10 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             actionNext.setEnabled(false);
         } else {
             actionNext.setEnabled(true);
+        }
+        if(isYearRevealed) {
+            int offset = years.indexOf(Utility.getYearFromPosition(pagerPosition));
+            yearPicker.smoothScrollToPosition(offset);
         }
         tvYearMonth.setText(calendarAdapter.getPageTitle(position));
     }
@@ -133,6 +186,16 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
         } else if(id == R.id.action_next) {
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+        } else if(id == R.id.tv_month_year) {
+            if(isYearRevealed) {
+                yearPickerLayout.setVisibility(View.GONE);
+                isYearRevealed = false;
+            } else {
+                yearPickerLayout.setVisibility(View.VISIBLE);
+                isYearRevealed = true;
+                int offset = years.indexOf(Utility.getYearFromPosition(pagerPosition));
+                yearPicker.scrollToPosition(offset);
+            }
         } else if(id == R.id.action_cancel) {
             cancel();
         } else if(id == R.id.action_ok) {
