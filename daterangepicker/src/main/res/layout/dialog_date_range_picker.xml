@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.LinearLayoutCompat
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
+    android:animateLayoutChanges="true"
     android:background="@android:color/white">
 
     <android.support.v7.widget.LinearLayoutCompat
@@ -132,29 +133,37 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
-        <android.support.v7.widget.AppCompatImageView
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/action_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_action_back"/>
+            android:tint="#444444"
+            android:src="@drawable/ic_action_back"
+            android:background="?selectableItemBackground"/>
 
         <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tv_month_year"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="August 2017"
             android:textSize="16sp"
+            android:textStyle="bold"
             android:gravity="center"
             android:textColor="#555555"/>
 
-        <android.support.v7.widget.AppCompatImageView
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/action_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_action_next"/>
+            android:tint="#444444"
+            android:src="@drawable/ic_action_next"
+            android:background="?selectableItemBackground"/>
     </android.support.v7.widget.LinearLayoutCompat>
 
     <android.support.v4.view.ViewPager
+        android:id="@+id/calendar_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -166,7 +175,8 @@
     <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
 
         <android.support.v4.widget.Space
             android:layout_width="0dp"
@@ -174,16 +184,20 @@
             android:layout_weight="1"/>
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/action_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorAccent"
-            android:text="CANCEL"/>
+            android:text="@android:string/cancel"
+            android:background="?selectableItemBackground"/>
 
         <android.support.v7.widget.AppCompatButton
+            android:id="@+id/action_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorAccent"
-            android:text="OK" />
+            android:text="@android:string/ok"
+            android:background="?selectableItemBackground"/>
 
     </android.support.v7.widget.LinearLayoutCompat>
 </android.support.v7.widget.LinearLayoutCompat>
