@@ -27,11 +27,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.angads25.daterangepicker.R;
+import com.github.angads25.daterangepicker.interfaces.OnItemClickListener;
 import com.github.angads25.daterangepicker.model.CalendarGridItem;
 import com.github.angads25.daterangepicker.model.Date;
 import com.github.angads25.daterangepicker.utils.Constants;
+import com.github.angads25.daterangepicker.utils.RecyclerViewTouchHandler;
 import com.github.angads25.daterangepicker.utils.Utility;
 
 import java.util.ArrayList;
@@ -59,15 +62,41 @@ public class CalendarPagerAdapter extends PagerAdapter {
         startOfYear = context.getResources().getIntArray(R.array.years)[0];
     }
 
-    @NonNull
     @Override
-    public View instantiateItem(@NonNull ViewGroup container, int position) {
+    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+        container.removeView((LinearLayoutCompat) object);
+    }
+
+    @Nullable
+    @Override
+    public CharSequence getPageTitle(int position) {
         int year = Utility.getYearFromPosition(startOfYear, position);
         int month = Utility.getMonthFromPosition(position);
+
+        String monthString = context.getResources().getStringArray(R.array.months)[month];
+        return monthString + " " + year;
+    }
+
+    @Override
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+        return view == object;
+    }
+
+    @Override
+    public int getCount() {
+        return dates.size();
+    }
+
+    @NonNull
+    @Override
+    public View instantiateItem(@NonNull ViewGroup container, final int pagePosition) {
+        final int year = Utility.getYearFromPosition(startOfYear, pagePosition);
+        final int month = Utility.getMonthFromPosition(pagePosition);
         View itemView = inflater.inflate(R.layout.item_calendar, container, false);
         RecyclerView recyclerView = itemView.findViewById(R.id.grid_calender);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 7));
-        ArrayList<CalendarGridItem> gridItems = new ArrayList<>();
+
+        final ArrayList<CalendarGridItem> gridItems = new ArrayList<>();
         int[] days = context.getResources().getIntArray(R.array.days_month);
         String[] days_week = context.getResources().getStringArray(R.array.days_week);
 
@@ -108,34 +137,22 @@ public class CalendarPagerAdapter extends PagerAdapter {
             gridItem.setItemType(Constants.ITEM_TYPE_DAY);
             gridItems.add(gridItem);
         }
-        recyclerView.setAdapter(new CalendarGridAdapter(context, gridItems));
+        final CalendarGridAdapter gridAdapter = new CalendarGridAdapter(context, gridItems);
+        recyclerView.setAdapter(gridAdapter);
         container.addView(itemView);
+        RecyclerViewTouchHandler handler = new RecyclerViewTouchHandler(context, recyclerView);
+        handler.setOnClickListener(new OnItemClickListener() {
+            @Override
+            public void onClick(RecyclerView recyclerView, View v, int position) {
+                CalendarGridItem gridItem = gridItems.get(position);
+                if(gridItem.isSelectable()) {
+                    gridItem.setSelected(!gridItem.isSelected());
+                    gridAdapter.notifyItemChanged(position);
+                    Toast.makeText(context, gridItem.getLabel() + "/" + (month + 1) + "/" + year, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         return itemView;
-    }
-
-    @Override
-    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-        container.removeView((LinearLayoutCompat) object);
-    }
-
-    @Nullable
-    @Override
-    public CharSequence getPageTitle(int position) {
-        int year = Utility.getYearFromPosition(startOfYear, position);
-        int month = Utility.getMonthFromPosition(position);
-
-        String monthString = context.getResources().getStringArray(R.array.months)[month];
-        return monthString + " " + year;
-    }
-
-    @Override
-    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
-        return view == object;
-    }
-
-    @Override
-    public int getCount() {
-        return dates.size();
     }
 
     public void setDatePair(Pair<Date, Date> datePair) {

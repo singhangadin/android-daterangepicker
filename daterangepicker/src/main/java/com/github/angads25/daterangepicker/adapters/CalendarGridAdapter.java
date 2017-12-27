@@ -18,6 +18,8 @@ package com.github.angads25.daterangepicker.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +59,20 @@ public class CalendarGridAdapter extends RecyclerView.Adapter<CalendarGridAdapte
         if(gridItem.getItemType() == Constants.ITEM_TYPE_WEEK) {
             holder.label.setTextColor(Color.parseColor("#A09FA0"));
         } else if(gridItem.getItemType() == Constants.ITEM_TYPE_DAY) {
-            holder.label.setTextColor(Color.parseColor("#444444"));
+            if(gridItem.isSelectable() && gridItem.isSelected()) {
+                GradientDrawable drawable = new GradientDrawable();
+                drawable.setShape(GradientDrawable.OVAL);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    drawable.setColor(context.getResources().getColor(R.color.colorAccent, context.getTheme()));
+                } else {
+                    drawable.setColor(context.getResources().getColor(R.color.colorAccent));
+                }
+                holder.label.setBackgroundDrawable(drawable);
+                holder.label.setTextColor(Color.parseColor("#FFFFFF"));
+            } else {
+                holder.label.setBackgroundDrawable(null);
+                holder.label.setTextColor(Color.parseColor("#444444"));
+            }
         }
         holder.label.setText(gridItem.getLabel());
     }
