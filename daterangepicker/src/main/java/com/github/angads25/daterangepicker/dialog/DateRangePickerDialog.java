@@ -34,6 +34,7 @@ import android.widget.AbsListView;
 import com.github.angads25.daterangepicker.R;
 import com.github.angads25.daterangepicker.adapters.CalendarPagerAdapter;
 import com.github.angads25.daterangepicker.adapters.YearPickerAdapter;
+import com.github.angads25.daterangepicker.interfaces.DateEventListener;
 import com.github.angads25.daterangepicker.model.Date;
 import com.github.angads25.daterangepicker.utils.Utility;
 
@@ -48,7 +49,8 @@ import java.util.Calendar;
 
 public class DateRangePickerDialog extends AppCompatDialog implements
         ViewPager.OnPageChangeListener,
-        View.OnClickListener {
+        View.OnClickListener,
+        DateEventListener {
     private int startOfYear;
 
     private Context context;
@@ -63,7 +65,11 @@ public class DateRangePickerDialog extends AppCompatDialog implements
     private ViewPager viewPager;
 
     private RecyclerView yearPicker;
+
+    private AppCompatTextView tvDateTo;
+    private AppCompatTextView tvDateFrom;
     private AppCompatTextView tvYearMonth;
+
     private AppCompatImageButton actionBack;
     private AppCompatImageButton actionNext;
 
@@ -99,6 +105,9 @@ public class DateRangePickerDialog extends AppCompatDialog implements
         tvYearMonth = findViewById(R.id.tv_month_year);
         actionBack = findViewById(R.id.action_back);
         actionNext = findViewById(R.id.action_next);
+
+        tvDateFrom = findViewById(R.id.tv_date_from);
+        tvDateTo = findViewById(R.id.tv_date_to);
 
         yearPickerLayout = findViewById(R.id.layout_year_picker);
 
@@ -144,6 +153,8 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             dates.add(date);
         }
         calendarAdapter = new CalendarPagerAdapter(context, dates);
+        calendarAdapter.setDateEventListener(this);
+        viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(calendarAdapter);
         viewPager.addOnPageChangeListener(this);
 
@@ -160,9 +171,14 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             viewPager.setCurrentItem(offset);
         }
 
+        tvDateFrom.setText(cal.get(Calendar.DAY_OF_MONTH) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR));
+
         actionBack.setOnClickListener(this);
         actionNext.setOnClickListener(this);
         tvYearMonth.setOnClickListener(this);
+
+        tvDateFrom.setOnClickListener(this);
+        tvDateTo.setOnClickListener(this);
 
         findViewById(R.id.action_ok).setOnClickListener(this);
         findViewById(R.id.action_cancel).setOnClickListener(this);
@@ -202,6 +218,10 @@ public class DateRangePickerDialog extends AppCompatDialog implements
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
         } else if(id == R.id.action_next) {
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+        } else if(id == R.id.tv_date_from) {
+
+        } else if(id == R.id.tv_date_to) {
+
         } else if(id == R.id.tv_month_year) {
             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 if (isYearRevealed) {
@@ -237,5 +257,10 @@ public class DateRangePickerDialog extends AppCompatDialog implements
                 viewPager.setCurrentItem(pagerPosition, true);
             }
         }
+    }
+
+    @Override
+    public void onDateChanged(Date date, int type) {
+        tvDateFrom.setText(date.getFormattedDate(context));
     }
 }

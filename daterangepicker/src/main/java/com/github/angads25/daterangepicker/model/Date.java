@@ -16,6 +16,12 @@
 
 package com.github.angads25.daterangepicker.model;
 
+import android.content.Context;
+
+import com.github.angads25.daterangepicker.R;
+
+import java.util.Calendar;
+
 /**
  * <p>
  * Created by Angad Singh on 23/12/17.
@@ -59,5 +65,13 @@ public class Date {
 
     public void setUtc(long utc) {
         this.utc = utc;
+    }
+
+    public String getFormattedDate(Context context) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(utc);
+        String day = context.getResources().getStringArray(R.array.days)[calendar.get(Calendar.DAY_OF_WEEK) - 1];
+        String month = context.getResources().getStringArray(R.array.months)[getMonth()];
+        return day + ", " + getDay() + " " + month + " " + getYear();
     }
 }

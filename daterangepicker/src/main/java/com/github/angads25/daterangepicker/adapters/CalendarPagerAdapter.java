@@ -27,9 +27,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.github.angads25.daterangepicker.R;
+import com.github.angads25.daterangepicker.interfaces.DateEventListener;
 import com.github.angads25.daterangepicker.interfaces.OnItemClickListener;
 import com.github.angads25.daterangepicker.model.CalendarGridItem;
 import com.github.angads25.daterangepicker.model.Date;
@@ -54,6 +54,7 @@ public class CalendarPagerAdapter extends PagerAdapter {
     private Pair<Date, Date> datePair;
 
     private int startOfYear;
+    private DateEventListener dateEventListener;
 
     public CalendarPagerAdapter(Context context, ArrayList<Date> dates) {
         this.context = context;
@@ -146,9 +147,27 @@ public class CalendarPagerAdapter extends PagerAdapter {
             public void onClick(RecyclerView recyclerView, View v, int position) {
                 CalendarGridItem gridItem = gridItems.get(position);
                 if(gridItem.isSelectable()) {
+                    Date date = new Date();
+                    date.setDay(Integer.parseInt(gridItem.getLabel()));
+                    date.setMonth(month);
+                    date.setYear(year);
                     gridItem.setSelected(!gridItem.isSelected());
                     gridAdapter.notifyItemChanged(position);
-                    Toast.makeText(context, gridItem.getLabel() + "/" + (month + 1) + "/" + year, Toast.LENGTH_SHORT).show();
+
+                    if(gridItem.isSelected()) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(gridItem.getLabel()));
+                        cal.set(Calendar.MONTH, month);
+                        cal.set(Calendar.YEAR, year);
+                        cal.set(Calendar.HOUR_OF_DAY, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+
+                        date.setUtc(cal.getTimeInMillis());
+                        if (dateEventListener != null) {
+                            dateEventListener.onDateChanged(date, 0);
+                        }
+                    }
                 }
             }
         });
@@ -157,5 +176,9 @@ public class CalendarPagerAdapter extends PagerAdapter {
 
     public void setDatePair(Pair<Date, Date> datePair) {
         this.datePair = datePair;
+    }
+
+    public void setDateEventListener(DateEventListener dateEventListener) {
+        this.dateEventListener = dateEventListener;
     }
 }
